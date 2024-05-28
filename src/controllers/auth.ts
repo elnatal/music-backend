@@ -29,7 +29,7 @@ export const auth = async (req: Request, res: Response) => {
 
   // generate a token
   const token = jwt.sign({ id: user.id }, JWT_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "1d",
   });
 
   // Send the response

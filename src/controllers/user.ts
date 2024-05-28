@@ -30,28 +30,26 @@ export const changeAccountType = async (req: Request, res: Response) => {
     );
   }
 
-  let user: User;
+  // check is the user exists
+  let user = await prismaClient.user.findFirst({
+    where: { id: validatedData.userId },
+  });
 
-  try {
-    // check is the user exists
-    user = await prismaClient.user.findFirstOrThrow({
-      where: { id: validatedData.userId },
-    });
-
-    // update the account type
-    user = await prismaClient.user.update({
-      where: { id: validatedData.userId },
-      data: { accountType: validatedData.accountType },
-    });
-
-    // send response
-    res.json(user);
-  } catch (error) {
+  if (!user) {
     throw new NotFoundException("User not found", ErrorCode.USER_NOT_FOUND);
   }
+
+  // update the account type
+  user = await prismaClient.user.update({
+    where: { id: validatedData.userId },
+    data: { accountType: validatedData.accountType },
+  });
+
+  // send response
+  res.json(user);
 };
 
-export const listUsers = async (req: Request, res: Response) => {
+export const list = async (req: Request, res: Response) => {
   let where = {};
 
   if (req.query.accountType) {
