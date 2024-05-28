@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { prismaClient } from "..";
-import { ChangeAccountTypeSchema, UpdateUserSchema } from "../schema/user";
-import { User } from "@prisma/client";
+import { AdminUpdateUserSchema, UpdateUserSchema } from "../schema/user";
 import { NotFoundException } from "../exceptions/not-found";
 import { ErrorCode } from "../exceptions/root";
 import { BadRequestException } from "../exceptions/bad-requests";
@@ -20,29 +19,29 @@ export const update = async (req: Request, res: Response) => {
   res.json(user);
 };
 
-export const changeAccountType = async (req: Request, res: Response) => {
-  const validatedData = ChangeAccountTypeSchema.parse(req.body);
+export const adminUpdate = async (req: Request, res: Response) => {
+  const validatedData = AdminUpdateUserSchema.parse(req.body);
 
-  if (validatedData.userId == req.user.id) {
+  if (req.params.id == req.user.id && validatedData.accountType) {
     throw new BadRequestException(
       "You cannot change your own account type",
       ErrorCode.YOU_CANT_CHANGE_YOUR_OWN_ACCOUNT_TYPE
     );
   }
 
-  // check is the user exists
+  // check if the user exists
   let user = await prismaClient.user.findFirst({
-    where: { id: validatedData.userId },
+    where: { id: req.params.id },
   });
 
   if (!user) {
     throw new NotFoundException("User not found", ErrorCode.USER_NOT_FOUND);
   }
 
-  // update the account type
+  // update user
   user = await prismaClient.user.update({
-    where: { id: validatedData.userId },
-    data: { accountType: validatedData.accountType },
+    where: { id: req.params.id },
+    data: validatedData,
   });
 
   // send response
