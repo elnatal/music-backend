@@ -16,6 +16,7 @@ datasource db {
 enum AccountType {
   USER
   ARTHIST
+  ADMIN
 }
 
 model User {

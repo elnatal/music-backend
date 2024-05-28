@@ -35,3 +35,7 @@ export const auth = async (req: Request, res: Response) => {
   // Send the response
   res.json({ user, token });
 };
+
+export const me = (req: Request, res: Response) => {
+  res.json(req.user);
+};
