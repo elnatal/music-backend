@@ -2,7 +2,7 @@ import {
   CLOUDINARY_API_KEY,
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_SECRET_KEY,
-} from "../secrets";
+} from "../../secrets";
 const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({

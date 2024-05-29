@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { adminUpdate, list, update } from "../controllers/user";
-import { errorHandler } from "../error-handler";
+import { errorHandler } from "../../error-handler";
 import roleMiddleware from "../middlewares/role";
 
 const userRoutes: Router = Router();

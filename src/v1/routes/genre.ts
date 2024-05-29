@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { create, update, list, get, remove } from "../controllers/genre";
-import { errorHandler } from "../error-handler";
+import { errorHandler } from "../../error-handler";
 import roleMiddleware from "../middlewares/role";
 
 const genreRoutes: Router = Router();

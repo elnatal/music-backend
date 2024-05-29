@@ -1,13 +1,13 @@
 import express, { Express } from "express";
 import { PORT } from "./secrets";
-import rootRouter from "./routes";
-import { errorMiddleware } from "./middlewares/errors";
+import v1Router from "./v1/routes";
+import { errorMiddleware } from "./v1/middlewares/errors";
 
 const app: Express = express();
 
 app.use(express.json());
 
-app.use("/api", rootRouter);
+app.use("/api/v1", v1Router);
 
 app.use(errorMiddleware);
 

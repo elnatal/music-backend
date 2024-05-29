@@ -302,22 +302,6 @@ export const upload = async (req: Request, res: Response) => {
   }
 };
 
-export const stream = async (req: Request, res: Response) => {
-  const song = await prismaClient.song.findFirst({
-    where: { id: req.params.id },
-  });
-
-  if (!song) {
-    throw new NotFoundException("Song not found", ErrorCode.SONG_NOT_FOUND);
-  }
-
-  const stream = cloudinary.uploader.download(song.fileUrl, {
-    resource_type: "raw",
-  });
-
-  stream.pipe(res);
-};
-
 export const like = async (req: Request, res: Response) => {
   let validatedData = LikeSchema.parse(req.body);
 

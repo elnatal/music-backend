@@ -9,7 +9,7 @@ import {
   like,
   likedSongs,
 } from "../controllers/song";
-import { errorHandler } from "../error-handler";
+import { errorHandler } from "../../error-handler";
 import roleMiddleware from "../middlewares/role";
 import { uploadFile } from "../middlewares/multer";
 
