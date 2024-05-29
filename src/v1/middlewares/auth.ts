@@ -10,14 +10,16 @@ const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  // extract the token from the header
-  const token = req.headers.authorization;
-
   // if token is not present, throw unauthorized exception
-  if (!token) {
+  if (!req.headers.authorization) {
     next(new UnauthorizedException("Unauthorized", ErrorCode.UNAUTHORIZED));
     return;
   }
+
+  // extract the token from the header
+  let tokenParts = req.headers.authorization.split(" ");
+  
+  let token = tokenParts[tokenParts.length - 1];
 
   try {
     // if token is present, validate and extract the payload

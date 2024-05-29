@@ -22,7 +22,7 @@ enum AccountType {
 model User {
   id          String      @id @default(uuid())
   name        String?
-  deteOfBirth DateTime?
+  dateOfBirth DateTime?
   accountType AccountType @default(USER)
   firebaseId  String      @unique
   createdAt   DateTime    @default(now())

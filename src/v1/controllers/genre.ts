@@ -13,6 +13,11 @@ export const create = async (req: Request, res: Response) => {
   // check if the same genre already exists
   let genre = await prismaClient.genre.findFirst({
     where: { name: validatedData.name },
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+    },
   });
 
   if (genre) {
@@ -28,7 +33,7 @@ export const create = async (req: Request, res: Response) => {
   });
 
   // send response
-  res.json(genre);
+  res.json({ genre });
 };
 
 export const update = async (req: Request, res: Response) => {
@@ -38,6 +43,11 @@ export const update = async (req: Request, res: Response) => {
   // check if the genre exists
   let genre = await prismaClient.genre.findFirst({
     where: { id: req.params.id },
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+    },
   });
 
   if (!genre) {
@@ -46,7 +56,7 @@ export const update = async (req: Request, res: Response) => {
 
   // check if the same genre already exists
   let existingGenre = await prismaClient.genre.findFirst({
-    where: { name: validatedData.name, NOT: { id: req.params.id }},
+    where: { name: validatedData.name, NOT: { id: req.params.id } },
   });
 
   if (existingGenre) {
@@ -60,10 +70,15 @@ export const update = async (req: Request, res: Response) => {
   genre = await prismaClient.genre.update({
     where: { id: req.params.id },
     data: validatedData,
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+    },
   });
 
   // send response
-  res.json(genre);
+  res.json({ genre });
 };
 
 export const list = async (req: Request, res: Response) => {
@@ -77,6 +92,11 @@ export const list = async (req: Request, res: Response) => {
     where,
     take: limit,
     skip,
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+    },
   });
 
   // send response
@@ -86,13 +106,18 @@ export const list = async (req: Request, res: Response) => {
 export const get = async (req: Request, res: Response) => {
   const genre = await prismaClient.genre.findFirst({
     where: { id: req.params.id },
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+    },
   });
 
   if (!genre) {
     throw new NotFoundException("Genre not found", ErrorCode.GENRE_NOT_FOUND);
   }
 
-  res.json(genre);
+  res.json({ genre });
 };
 
 export const remove = async (req: Request, res: Response) => {

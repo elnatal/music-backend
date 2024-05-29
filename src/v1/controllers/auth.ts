@@ -2,17 +2,25 @@ import { Request, Response } from "express";
 import firebaseClient from "../utils/firebase";
 import * as jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../../secrets";
-import { SignupSchema } from "../schema/auth";
+import { AuthSchema } from "../schema/auth";
 import prismaClient from "../utils/prisma";
+import { UnauthorizedException } from "../exceptions/unauthorized";
+import { ErrorCode } from "../exceptions/root";
 
 export const auth = async (req: Request, res: Response) => {
   // validate the incoming data
-  SignupSchema.parse(req.body);
+  AuthSchema.parse(req.body);
 
   const { idToken } = req.body;
 
-  // validate firebase token
-  const decodedToken = await firebaseClient.auth().verifyIdToken(idToken);
+  let decodedToken: any;
+
+  try {
+    // validate firebase token
+    decodedToken = await firebaseClient.auth().verifyIdToken(idToken);
+  } catch (error) {
+    throw new UnauthorizedException("Unauthorized", ErrorCode.UNAUTHORIZED);
+  }
 
   // Check if the user exists in the database
   let user = await prismaClient.user.findFirst({
@@ -34,9 +42,26 @@ export const auth = async (req: Request, res: Response) => {
   });
 
   // Send the response
-  res.json({ user, token });
+  res.json({
+    user: {
+      id: user.id,
+      name: user.name,
+      dateOfBirth: user.dateOfBirth,
+      accountType: user.accountType,
+      createdAt: user.createdAt,
+    },
+    token,
+  });
 };
 
 export const me = (req: Request, res: Response) => {
-  res.json(req.user);
+  res.json({
+    user: {
+      id: req.user.id,
+      name: req.user.name,
+      dateOfBirth: req.user.dateOfBirth,
+      accountType: req.user.accountType,
+      createdAt: req.user.createdAt,
+    },
+  });
 };

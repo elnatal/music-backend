@@ -13,10 +13,17 @@ export const update = async (req: Request, res: Response) => {
   const user = await prismaClient.user.update({
     where: { id: req.user.id },
     data: validatedData,
+    select: {
+      id: true,
+      name: true,
+      dateOfBirth: true,
+      accountType: true,
+      createdAt: true,
+    },
   });
 
   // send response
-  res.json(user);
+  res.json({ user });
 };
 
 export const adminUpdate = async (req: Request, res: Response) => {
@@ -32,6 +39,13 @@ export const adminUpdate = async (req: Request, res: Response) => {
   // check if the user exists
   let user = await prismaClient.user.findFirst({
     where: { id: req.params.id },
+    select: {
+      id: true,
+      name: true,
+      dateOfBirth: true,
+      accountType: true,
+      createdAt: true,
+    },
   });
 
   if (!user) {
@@ -42,10 +56,17 @@ export const adminUpdate = async (req: Request, res: Response) => {
   user = await prismaClient.user.update({
     where: { id: req.params.id },
     data: validatedData,
+    select: {
+      id: true,
+      name: true,
+      dateOfBirth: true,
+      accountType: true,
+      createdAt: true,
+    },
   });
 
   // send response
-  res.json(user);
+  res.json({ user });
 };
 
 export const list = async (req: Request, res: Response) => {
@@ -63,6 +84,13 @@ export const list = async (req: Request, res: Response) => {
     where,
     take: limit,
     skip,
+    select: {
+      id: true,
+      name: true,
+      dateOfBirth: true,
+      accountType: true,
+      createdAt: true,
+    },
   });
 
   // send response
