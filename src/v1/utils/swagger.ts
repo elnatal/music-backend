@@ -7,10 +7,8 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Express API with Swagger",
-      version: "0.1.0",
-      description:
-        "This is a simple CRUD API application made with Express and documented with Swagger",
+      title: "Music API",
+      version: "V1",
     },
     servers: [
       {
@@ -45,7 +43,9 @@ export const v1SwaggerDocs = (app: Express, port: Number) => {
     res.json(specs);
   });
 
-  console.log(`V1 Api doc is available at http://localhost:${port}/v1/api-docs`);
+  console.log(
+    `V1 Api doc is available at http://localhost:${port}/v1/api-docs`
+  );
 };
 
 export default v1SwaggerDocs;
