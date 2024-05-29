@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ErrorCode, HttpException } from "./exceptions/root";
-import { InternalException } from "./exceptions/internal-exception";
+import { InternalException } from "./exceptions/internal";
 import { ZodError } from "zod";
 import { UnprocessableEntityException } from "./exceptions/validation";
 

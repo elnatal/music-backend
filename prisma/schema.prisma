@@ -15,7 +15,7 @@ datasource db {
 
 enum AccountType {
   USER
-  ARTHIST
+  ARTIST
   ADMIN
 }
 
@@ -27,15 +27,41 @@ model User {
   firebaseId  String      @unique
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  songs       Song[]
 
   @@map("users")
 }
 
 model Genre {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String      @id @default(uuid())
+  name      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  songs     SongGenre[]
 
   @@map("geners")
+}
+
+model Song {
+  id        String      @id @default(uuid())
+  title     String
+  fileUrl   String
+  artistId  String
+  artist    User        @relation(fields: [artistId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  genres    SongGenre[]
+
+  @@map("songs")
+}
+
+model SongGenre {
+  songId    String
+  song      Song     @relation(fields: [songId], references: [id])
+  genreId   String
+  genre     Genre    @relation(fields: [genreId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([songId, genreId])
+  @@map("song_genres")
 }
