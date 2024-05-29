@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import firebaseClient from "../utils/firebase";
 import * as jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../../secrets";
-import { AuthSchema } from "../schema/auth";
+import { FIREBASE_WEB_KEY, JWT_SECRET } from "../../secrets";
+import { AuthSchema, GetIdTokenSchema } from "../schema/auth";
 import prismaClient from "../utils/prisma";
 import { UnauthorizedException } from "../exceptions/unauthorized";
 import { ErrorCode } from "../exceptions/root";
+import axios from "axios";
 
 export const auth = async (req: Request, res: Response) => {
   // validate the incoming data
@@ -64,4 +65,25 @@ export const me = (req: Request, res: Response) => {
       createdAt: req.user.createdAt,
     },
   });
+};
+
+export const getIdToken = async (req: Request, res: Response) => {
+  // validate the incoming data
+  let validatedData = GetIdTokenSchema.parse(req.body);
+  try {
+    let response = await axios.post(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_KEY}`,
+      {
+        email: validatedData.email,
+        password: validatedData.password,
+        returnSecureToken: true,
+      }
+    );
+
+    res.json({
+      idToken: response.data.idToken,
+    });
+  } catch (error) {
+    throw new UnauthorizedException("Unauthorized", ErrorCode.UNAUTHORIZED);
+  }
 };

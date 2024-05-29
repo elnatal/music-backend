@@ -46,5 +46,5 @@ export const UpdateGenreSchema = z.object({
  *                createdAt:
  *                  type: string
  *          count:
- *          type: number
+ *            type: number
  */
