@@ -28,6 +28,7 @@ model User {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   songs       Song[]
+  likedSongs        Like[]
 
   @@map("users")
 }
@@ -51,6 +52,7 @@ model Song {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   genres    SongGenre[]
+  likes      Like[]
 
   @@map("songs")
 }
@@ -64,4 +66,15 @@ model SongGenre {
 
   @@id([songId, genreId])
   @@map("song_genres")
+}
+
+model Like {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  songId    String
+  song      Song     @relation(fields: [songId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([userId, songId])
+  @@map("likes")
 }

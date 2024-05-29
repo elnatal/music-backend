@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prismaClient } from "..";
+import prismaClient from "../utils/prisma";
 import { CreateGenreSchema, UpdateGenreSchema } from "../schema/genre";
 import { User } from "@prisma/client";
 import { NotFoundException } from "../exceptions/not-found";

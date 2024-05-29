@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prismaClient } from "..";
+import prismaClient from "../utils/prisma";
 import { AdminUpdateUserSchema, UpdateUserSchema } from "../schema/user";
 import { NotFoundException } from "../exceptions/not-found";
 import { ErrorCode } from "../exceptions/root";

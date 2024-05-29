@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { firebaseClient, prismaClient } from "..";
+import firebaseClient from "../utils/firebase";
 import * as jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../secrets";
 import { SignupSchema } from "../schema/auth";
+import prismaClient from "../utils/prisma";
 
 export const auth = async (req: Request, res: Response) => {
   // validate the incoming data

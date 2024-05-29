@@ -1,11 +1,30 @@
 import { Request, Response } from "express";
-import { cloudinary, prismaClient } from "..";
+import prismaClient from "../utils/prisma";
+import cloudinary from "../utils/cloudinary";
 import { NotFoundException } from "../exceptions/not-found";
 import { ErrorCode } from "../exceptions/root";
 import { CreateSongSchema, UpdateSongSchema } from "../schema/song";
+import { LikeSchema } from "../schema/like";
 import { UnprocessableEntityException } from "../exceptions/validation";
 import fs from "fs";
 import { UnauthorizedException } from "../exceptions/unauthorized";
+
+const restructureSong = (song: any) => {
+  return {
+    id: song.id,
+    title: song.title,
+    fileUrl: song.fileUrl,
+    artist: song.artist,
+    genres: song.genres?.map((songGenre: any) => songGenre.genre),
+    likes: song._count?.likes,
+    liked: song.likes?.length > 0,
+    createdAt: song.createdAt,
+  };
+};
+
+const restructureSongs = (songs: any) => {
+  return songs.map(restructureSong);
+};
 
 export const create = async (req: Request, res: Response) => {
   // validate the incoming data
@@ -29,22 +48,58 @@ export const create = async (req: Request, res: Response) => {
         }),
       },
     },
+    include: {
+      genres: {
+        select: {
+          genre: {
+            select: { id: true, name: true },
+          },
+        },
+      },
+      artist: {
+        select: { id: true, name: true },
+      },
+      likes: {
+        where: { userId: req.user.id },
+      },
+      _count: {
+        select: { likes: true },
+      },
+    },
   });
 
   // send response
-  res.json(song);
+  res.json({ song: restructureSong(song) });
 };
 
 export const get = async (req: Request, res: Response) => {
   const song = await prismaClient.song.findFirst({
     where: { id: req.params.id },
+    include: {
+      genres: {
+        select: {
+          genre: {
+            select: { id: true, name: true },
+          },
+        },
+      },
+      artist: {
+        select: { id: true, name: true },
+      },
+      likes: {
+        where: { userId: req.user.id },
+      },
+      _count: {
+        select: { likes: true },
+      },
+    },
   });
 
   if (!song) {
     throw new NotFoundException("Song not found", ErrorCode.SONG_NOT_FOUND);
   }
 
-  res.json(song);
+  res.json({ song: restructureSong(song) });
 };
 
 export const update = async (req: Request, res: Response) => {
@@ -113,18 +168,24 @@ export const update = async (req: Request, res: Response) => {
       genres: {
         select: {
           genre: {
-            select: {
-              id: true,
-              name: true,
-            },
+            select: { id: true, name: true },
           },
         },
+      },
+      artist: {
+        select: { id: true, name: true },
+      },
+      likes: {
+        where: { userId: req.user.id },
+      },
+      _count: {
+        select: { likes: true },
       },
     },
   });
 
   // send response
-  res.json(song);
+  res.json({ song: restructureSong(song) });
 };
 
 export const list = async (req: Request, res: Response) => {
@@ -149,11 +210,17 @@ export const list = async (req: Request, res: Response) => {
       artist: {
         select: { id: true, name: true },
       },
+      likes: {
+        where: { userId: req.user.id },
+      },
+      _count: {
+        select: { likes: true },
+      },
     },
   });
 
   // return songs
-  res.json({ songs, count });
+  res.json({ songs: restructureSongs(songs), count });
 };
 
 export const remove = async (req: Request, res: Response) => {
@@ -170,7 +237,25 @@ export const remove = async (req: Request, res: Response) => {
     throw new UnauthorizedException("Unauthorized", ErrorCode.UNAUTHORIZED);
   }
 
-  await prismaClient.song.delete({ where: { id: req.params.id } });
+  const deleteGenres = prismaClient.songGenre.deleteMany({
+    where: {
+      songId: req.params.id,
+    },
+  });
+
+  const deleteLikes = prismaClient.like.deleteMany({
+    where: {
+      songId: req.params.id,
+    },
+  });
+
+  const deleteSong = prismaClient.song.delete({
+    where: {
+      id: req.params.id,
+    },
+  });
+
+  await prismaClient.$transaction([deleteGenres, deleteLikes, deleteSong]);
 
   res.json({ success: true });
 };
@@ -215,4 +300,92 @@ export const upload = async (req: Request, res: Response) => {
     // delete the file from the server
     fs.unlinkSync(file.path);
   }
+};
+
+export const stream = async (req: Request, res: Response) => {
+  const song = await prismaClient.song.findFirst({
+    where: { id: req.params.id },
+  });
+
+  if (!song) {
+    throw new NotFoundException("Song not found", ErrorCode.SONG_NOT_FOUND);
+  }
+
+  const stream = cloudinary.uploader.download(song.fileUrl, {
+    resource_type: "raw",
+  });
+
+  stream.pipe(res);
+};
+
+export const like = async (req: Request, res: Response) => {
+  let validatedData = LikeSchema.parse(req.body);
+
+  const song = await prismaClient.song.findFirst({
+    where: { id: req.params.id },
+  });
+
+  if (!song) {
+    throw new NotFoundException("Song not found", ErrorCode.SONG_NOT_FOUND);
+  }
+
+  if (validatedData.liked) {
+    await prismaClient.like.createMany({
+      data: {
+        songId: req.params.id,
+        userId: req.user.id,
+      },
+      skipDuplicates: true,
+    });
+  } else {
+    await prismaClient.like.deleteMany({
+      where: {
+        songId: req.params.id,
+        userId: req.user.id,
+      },
+    });
+  }
+
+  res.json({ liked: validatedData.liked });
+};
+
+export const likedSongs = async (req: Request, res: Response) => {
+  let where = {
+    likes: {
+      some: {
+        userId: req.user.id,
+      },
+    },
+  };
+  let limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+  let skip = req.query.skip ? parseInt(req.query.skip as string) : 0;
+
+  // get total songs count and songs
+  let count = await prismaClient.song.count({ where });
+  let songs = await prismaClient.song.findMany({
+    where,
+    take: limit,
+    skip,
+    include: {
+      genres: {
+        select: {
+          genre: {
+            select: { id: true, name: true },
+          },
+        },
+      },
+      artist: {
+        select: { id: true, name: true },
+      },
+      likes: {
+        where: { userId: req.user.id },
+      },
+      _count: {
+        select: { likes: true },
+      },
+    },
+  });
+
+  // return songs
+  res.json({ songs: restructureSongs(songs), count });
 };
