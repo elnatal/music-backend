@@ -66,7 +66,7 @@ This project is a simple Express.js backend for a music application.
     yarn seed
     ```
 
-    This will create two accounts:
+    This will create three accounts:
 
          Admin account:
              - Email: admin@music.com
@@ -94,11 +94,11 @@ This project is a simple Express.js backend for a music application.
    Open [http://localhost:4000/v1/api-docs](http://localhost:4000/v1/api-docs) in your browser.
 
 3. **Get IdToken:**
-    - To simulate the authentication flow we are going to use `/auth/get-id-token` as a client application.
-    - It will generate `idToken`
+    - To simulate the authentication process we are going to use `/auth/get-id-token` as a client application.
+    - It will generate `idToken` (which comes from firebase)
 4. **Authenticate using the idToken**
     - Send a post request to `/auth` with the `idToken` to authenticate
-    - It generate a `token`
+    - It will generate a `token`
 5. **Use the token to access other Apis**
     - In the top right corner you can find **Authorize** button
     - Set the token there and you are good to go
@@ -108,3 +108,7 @@ This project is a simple Express.js backend for a music application.
 ```sh
 yarn test
 ```
+
+
+
+
