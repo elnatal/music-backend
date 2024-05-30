@@ -87,7 +87,7 @@ This project is a simple Express.js backend for a music application.
 1. **Start the server:**
 
    ```sh
-   yarn start
+   yarn dev
    ```
 
 2. **Access the API documentation:**
@@ -104,10 +104,17 @@ This project is a simple Express.js backend for a music application.
     - Set the token there and you are good to go
 
 ### Running Tests
+1. **Setup environment variables:**
+    Create a `.env.test` file in the root directory and add the following variables:
 
-```sh
-yarn test
-```
+    ```env
+    DATABASE_URL=<your_test_database_url> # must different from the main database
+    JWT_SECRET=<your-jwt-secret>
+    ```
+2. **Run the test**
+    ```sh
+    yarn test
+    ```
 
 
 

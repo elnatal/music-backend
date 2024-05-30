@@ -203,7 +203,7 @@ songRoutes.get("/:id", errorHandler(get));
 
 /***
  * @openapi
- * '/likes/{id}/like':
+ * '/songs/{id}/like':
  *  post:
  *      tags:
  *      - Song

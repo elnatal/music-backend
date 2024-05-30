@@ -1,4 +1,4 @@
-import { Express, Request, Response } from "express";
+import { Application, Request, Response } from "express";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 import { PORT } from "../../secrets";
@@ -35,7 +35,7 @@ const options = {
 
 const specs = swaggerJsdoc(options);
 
-export const v1SwaggerDocs = (app: Express, port: Number) => {
+export const v1SwaggerDocs = (app: Application, port: Number) => {
   app.use("/v1/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
   app.get("docs.json", (req: Request, res: Response) => {
